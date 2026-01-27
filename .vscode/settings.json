@@ -12,7 +12,7 @@
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
     "**/.retool_types/**": true,
-
+    ".react-router": true,
     ".cache": true,
     "retool.config.json": true
   },

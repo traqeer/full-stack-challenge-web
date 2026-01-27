@@ -1,4 +1,4 @@
-import { isRouteErrorResponse, Links, Meta, Scripts, useRouteError } from 'react-router';
+import { isRouteErrorResponse, useRouteError } from 'react-router';
 import { useStandaloneTranslations } from '~/lib/i18n/standalone';
 import type { Translations } from '~/lib/i18n/types';
 
@@ -42,104 +42,54 @@ export function ErrorBoundary() {
   if (isRouteErrorResponse(error)) {
     if (error.status === 404) {
       return (
-        <html lang={lang} className="light">
-          <head>
-            <meta charSet="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <title>{t('notFoundTitle')}</title>
-            <Meta />
-            <Links />
-          </head>
-          <body className="min-h-screen bg-background">
-            <div className="flex min-h-screen flex-col items-center justify-center px-4">
-              <div className="text-center">
-                <h1 className="text-9xl font-bold text-gray-200 dark:text-gray-800">404</h1>
-                <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
-                  {t('notFoundHeading')}
-                </h2>
-                <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-                  {t('notFoundDescription')}
-                </p>
-                <a
-                  href="/"
-                  className="mt-8 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 transition-colors"
-                >
-                  {t('notFoundButton')}
-                </a>
-              </div>
-            </div>
-            <Scripts />
-          </body>
-        </html>
+        <div className="flex min-h-screen flex-col items-center justify-center px-4">
+          <div className="text-center">
+            <h1 className="text-6xl font-bold">404</h1>
+            <h2 className="mt-4 text-2xl font-bold">{t('notFoundHeading')}</h2>
+            <p className="mt-4 text-lg text-gray-600">{t('notFoundDescription')}</p>
+            <a
+              href="/"
+              className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
+            >
+              {t('notFoundButton')}
+            </a>
+          </div>
+        </div>
       );
     }
 
     return (
-      <html lang={lang} className="light">
-        <head>
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>
-            {error.status} - {t('errorTitle')}
-          </title>
-          <Meta />
-          <Links />
-        </head>
-        <body className="min-h-screen bg-background">
-          <div className="flex min-h-screen flex-col items-center justify-center px-4">
-            <div className="text-center">
-              <h1 className="text-9xl font-bold text-gray-200 dark:text-gray-800">
-                {error.status}
-              </h1>
-              <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
-                {error.statusText || t('errorHeading')}
-              </h2>
-              <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-                {error.data?.message || t('errorDescription')}
-              </p>
-              <a
-                href="/"
-                className="mt-8 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 transition-colors"
-              >
-                {t('errorButton')}
-              </a>
-            </div>
-          </div>
-          <Scripts />
-        </body>
-      </html>
+      <div className="flex min-h-screen flex-col items-center justify-center px-4">
+        <div className="text-center">
+          <h1 className="text-5xl font-bold">{error.status}</h1>
+          <h2 className="mt-4 text-2xl font-bold">{error.statusText || t('errorHeading')}</h2>
+          <p className="mt-4 text-lg text-gray-600">
+            {error.data?.message || t('errorDescription')}
+          </p>
+          <a
+            href="/"
+            className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
+          >
+            {t('errorButton')}
+          </a>
+        </div>
+      </div>
     );
   }
 
   return (
-    <html lang={lang} className="light">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{t('runtimeTitle')}</title>
-        <Meta />
-        <Links />
-      </head>
-      <body className="min-h-screen bg-background">
-        <div className="flex min-h-screen flex-col items-center justify-center px-4">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-red-600">{t('runtimeHeading')}</h1>
-            <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
-              {t('runtimeSubheading')}
-            </h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
-              {t('runtimeDescription')}
-            </p>
-            <a
-              href="/"
-              className="mt-8 inline-block rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 transition-colors"
-            >
-              {t('runtimeButton')}
-            </a>
-          </div>
-        </div>
-        <Scripts />
-      </body>
-    </html>
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-red-600">{t('runtimeHeading')}</h1>
+        <h2 className="mt-3 text-xl font-medium">{t('runtimeSubheading')}</h2>
+        <p className="mt-3 text-lg text-gray-600">{t('runtimeDescription')}</p>
+        <a
+          href="/"
+          className="mt-6 inline-block rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition-colors"
+        >
+          {t('runtimeButton')}
+        </a>
+      </div>
+    </div>
   );
 }
