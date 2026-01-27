@@ -1,3 +1,33 @@
+# Todo App (Challenge base)
+
+Minimal TODO app scaffold used for technical challenges. Features:
+
+- Typed mock backend (`app/lib/backend`)
+- Todos context (`app/lib/todos`) with CRUD methods
+- Time API wrapper (`app/lib/timeapi`) with typed response and fallback
+- Pages for list, create/edit and detail under `app/routes/todos`
+- Simple per-page translations under `app/routes/todos/translations.ts`
+- Copilot rules: `.github/copilot_rules.md`
+
+How to run
+
+1. Install dependencies (if not installed):
+
+```powershell
+npm install
+```
+
+2. Start dev server:
+
+```powershell
+npm run dev
+```
+
+Notes
+
+- The mock backend is in-memory and resets on reload.
+- The `getCurrentTime` wrapper fetches from worldtimeapi.org and falls back to a local value on error.
+
 # Traqeer Challenge (esqueleto)
 
 Este directorio `challenge` contiene un esqueleto mínimo para un proyecto Vite + React + React Router que imita la configuración del repo principal.
@@ -11,6 +41,7 @@ npm run dev
 ```
 
 Notas:
+
 - `vite.config.ts` incluye los plugins `@react-router/dev` y `@tailwindcss/vite`, como en el repo principal.
 - Si quieres Tailwind funcionando, instala las dependencias listadas en `package.json` (tailwindcss, postcss, autoprefixer).
 - Esto sólo crea el proyecto; ejecutar `npm install` instalará las dependencias reales.

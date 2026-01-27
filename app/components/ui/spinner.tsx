@@ -1,31 +1,26 @@
-import { Loader2Icon } from 'lucide-react';
-
-export interface SpinnerProps {
+export type SpinnerProps = {
   size?: 'sm' | 'md' | 'lg';
-}
-
-function Spinner({ size = 'md' }: SpinnerProps) {
-  const sizeClass = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-10 w-10' : 'h-6 w-6';
-  return <Loader2Icon className={`animate-spin ${sizeClass}`} />;
-}
-
-const DemoProps = {
-  props: [
-    {
-      name: 'size',
-      type: 'select',
-      required: false,
-      description: 'The size of the spinner',
-      options: ['sm', 'md', 'lg'],
-    },
-  ],
-  defaultValues: {
-    size: 'md',
-  },
 };
 
-function Demo(props: Partial<SpinnerProps>) {
-  return <Spinner size={props?.size || 'md'} />;
+export function Spinner({ size = 'md' }: SpinnerProps) {
+  const dims = size === 'sm' ? 1.5 : size === 'lg' ? 2.5 : 2;
+  return (
+    <svg
+      className="animate-spin text-blue-600"
+      style={{ width: `${dims}rem`, height: `${dims}rem` }}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.2" />
+      <path
+        d="M22 12a10 10 0 00-10-10"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
-export { Demo, DemoProps, Spinner };
+export default Spinner;

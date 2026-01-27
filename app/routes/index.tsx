@@ -21,7 +21,7 @@ export default function IndexRoute() {
 
   useEffect(() => {
     setTimeout(() => {
-      navigate('/home');
+      navigate('/todos');
     }, 1000);
   }, [navigate]);
 
