@@ -1,0 +1,1 @@
+- Siempre que necesites referencia de la estrucutra de una API mira su archivo types.ts no hace falta revisar la implementación final.
