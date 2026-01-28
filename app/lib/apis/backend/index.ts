@@ -1,17 +1,31 @@
 import type { CreateTodoDTO, TodoDTO, UpdateTodoDTO } from './types';
-// lightweight id generator to avoid adding dependencies in the challenge
 function uid() {
   return Math.random().toString(36).slice(2, 9);
 }
 
-// In-memory store. In a real app this would be replaced by HTTP calls.
 const store: TodoDTO[] = [
   {
     id: uid(),
-    title: 'Welcome to Todo App',
-    description: 'This is a sample todo created by the mock backend.',
+    title: 'Comprar víveres para la semana',
+    description: 'Ir al supermercado y comprar frutas, verduras, carne y productos de limpieza.',
     completed: false,
     order: 0,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: uid(),
+    title: 'Preparar presentación del proyecto',
+    description: 'Crear las diapositivas y practicar la presentación para la reunión del viernes.',
+    completed: false,
+    order: 1,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: uid(),
+    title: 'Llamar al banco',
+    description: 'Contactar al banco para resolver el problema con la tarjeta de débito.',
+    completed: true,
+    order: 2,
     createdAt: new Date().toISOString(),
   },
 ];
@@ -22,7 +36,6 @@ function delay<T>(value: T, ms = 200) {
 
 export const todoApi = {
   async getTodos(): Promise<TodoDTO[]> {
-    // return a shallow clone sorted by order
     const copy = store.slice().sort((a, b) => a.order - b.order);
     return delay(copy);
   },
