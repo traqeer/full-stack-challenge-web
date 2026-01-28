@@ -53,39 +53,51 @@ export function TodosList() {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const visibleIds = visibleTodos.map((t) => t.id);
-    const oldIndex = visibleIds.indexOf(String(active.id));
-    const newIndex = visibleIds.indexOf(String(over.id));
-    if (oldIndex === -1 || newIndex === -1) return;
+    // Find the dragged todo's position in visible todos
+    const draggedId = String(active.id);
+    const targetId = String(over.id);
 
-    const newVisible = arrayMove(visibleTodos.slice(), oldIndex, newIndex);
+    const draggedIndex = visibleTodos.findIndex((t) => t.id === draggedId);
+    const targetIndex = visibleTodos.findIndex((t) => t.id === targetId);
 
-    const base = todos.slice().sort((a, b) => a.order - b.order);
-    const minPos = Math.min(...base.map((t, i) => (visibleIds.includes(t.id) ? i : Infinity)));
-    const baseWithoutVisible = base.filter((t) => !visibleIds.includes(t.id));
-    const newBase = [
-      ...baseWithoutVisible.slice(0, minPos),
-      ...newVisible,
-      ...baseWithoutVisible.slice(minPos),
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Reorder only the visible todos
+    const reorderedVisible = arrayMove(visibleTodos, draggedIndex, targetIndex);
+
+    // Calculate new global order: insert reordered visible todos back into full list
+    const allTodosSorted = [...todos].sort((a, b) => a.order - b.order);
+    const visibleIds = new Set(visibleTodos.map((t) => t.id));
+
+    // Remove visible todos from the sorted list
+    const hiddenTodos = allTodosSorted.filter((t) => !visibleIds.has(t.id));
+
+    // Find where to insert the reordered visible todos
+    const firstVisibleOriginalIndex = allTodosSorted.findIndex((t) => visibleIds.has(t.id));
+    const newGlobalOrder = [
+      ...hiddenTodos.slice(0, firstVisibleOriginalIndex),
+      ...reorderedVisible,
+      ...hiddenTodos.slice(firstVisibleOriginalIndex),
     ];
 
+    // Update local state immediately
     if (reorderTodos) {
-      reorderTodos(newBase.map((t) => t.id));
+      reorderTodos(newGlobalOrder.map((t) => t.id));
     }
 
-    (async () => {
-      try {
-        await Promise.all(
-          newBase.map((t, i) =>
-            import('~/lib/apis/backend').then(({ todoApi }) =>
-              todoApi.updateTodo(t.id, { order: i })
-            )
+    // Update backend with new order
+    try {
+      await Promise.all(
+        newGlobalOrder.map((todo, index) =>
+          import('~/lib/apis/backend').then(({ todoApi }) =>
+            todoApi.updateTodo(todo.id, { order: index })
           )
-        );
-      } catch (err) {
-        refresh().catch(() => {});
-      }
-    })();
+        )
+      );
+    } catch (err) {
+      // Revert on error
+      await refresh();
+    }
   };
 
   return (
