@@ -1,5 +1,5 @@
 export const useMock =
-  typeof window === 'undefined' ? process.env.VITE_USE_MOCK : import.meta.env.VITE_USE_MOCK;
+  (typeof window === 'undefined' ? process.env.VITE_USE_MOCK : import.meta.env.VITE_USE_MOCK) === 'true';
 
 const apiModule = useMock ? await import('./mock') : await import('./backend');
 
