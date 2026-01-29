@@ -1,4 +1,10 @@
-import type { CreateTodoDTO, TodoApiService, TodoDTO, UpdateTodoDTO } from '../types';
+import type {
+  CreateTodoDTO,
+  ReorderTodoDTO,
+  TodoApiService,
+  TodoDTO,
+  UpdateTodoDTO,
+} from '../types';
 
 function uid() {
   return Math.random().toString(36).slice(2, 9);
@@ -11,7 +17,8 @@ const store: TodoDTO[] = [
     description: 'Ir al supermercado y comprar frutas, verduras, carne y productos de limpieza.',
     completed: false,
     order: 0,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: uid(),
@@ -19,7 +26,8 @@ const store: TodoDTO[] = [
     description: 'Crear las diapositivas y practicar la presentación para la reunión del viernes.',
     completed: false,
     order: 1,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: uid(),
@@ -27,7 +35,8 @@ const store: TodoDTO[] = [
     description: 'Contactar al banco para resolver el problema con la tarjeta de débito.',
     completed: true,
     order: 2,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ];
 
@@ -39,14 +48,15 @@ export const todoApi: TodoApiService = {
   getTodos: (): Promise<TodoDTO[]> => delay(store.slice().sort((a, b) => a.order - b.order)),
   createTodo: (payload: CreateTodoDTO): Promise<TodoDTO> => {
     const nextOrder = store.length ? Math.max(...store.map((t) => t.order)) + 1 : 0;
-    const now = new Date().toISOString();
+    const now = new Date();
     const todo: TodoDTO = {
       id: uid(),
       title: payload.title,
-      description: payload.description,
+      description: payload.description || null,
       completed: false,
-      order: payload.order ?? nextOrder,
+      order: nextOrder,
       createdAt: now,
+      updatedAt: now,
     };
     store.push(todo);
     return delay({ ...todo });
@@ -57,7 +67,7 @@ export const todoApi: TodoApiService = {
     const updated: TodoDTO = {
       ...store[idx],
       ...payload,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
     };
     store[idx] = updated;
     return delay({ ...updated });
@@ -68,15 +78,27 @@ export const todoApi: TodoApiService = {
     store.splice(idx, 1);
     return delay(true);
   },
-  reorderTodos: (idsInOrder: string[]): Promise<void> => {
+  reorderTodos: (payload: ReorderTodoDTO): Promise<void> => {
     const reorderedStore: TodoDTO[] = [];
-    idsInOrder.forEach((id, index) => {
-      const todo = store.find((t) => t.id === id);
+    payload.items.forEach((item) => {
+      const todo = store.find((t) => t.id === item.id);
       if (todo) {
-        reorderedStore.push({ ...todo, order: index });
+        reorderedStore.push({ ...todo, order: item.order });
       }
     });
     store.splice(0, store.length, ...reorderedStore);
     return delay(undefined);
+  },
+  toggleCompleted: (id: string): Promise<TodoDTO> => {
+    const idx = store.findIndex((t) => t.id === id);
+    if (idx === -1) throw new Error('Todo not found');
+    const todo = store[idx];
+    const updated: TodoDTO = {
+      ...todo,
+      completed: !todo.completed,
+      updatedAt: new Date(),
+    };
+    store[idx] = updated;
+    return delay(updated);
   },
 };

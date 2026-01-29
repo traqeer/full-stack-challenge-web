@@ -9,7 +9,8 @@ type TodosContextType = {
   createTodo: (payload: CreateTodoDTO) => Promise<TodoDTO>;
   updateTodo: (id: string, payload: UpdateTodoDTO) => Promise<TodoDTO | null>;
   deleteTodo: (id: string) => Promise<boolean>;
-  reorderTodos?: (idsInOrder: string[]) => void;
+  toggleCompleted: (id: string) => Promise<TodoDTO>;
+  reorderTodos?: (idsInOrder: string[]) => Promise<void>;
   filter: 'all' | 'pending' | 'completed';
   setFilter: (filter: 'all' | 'pending' | 'completed') => void;
   counts: {
@@ -31,6 +32,7 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const list = await todoApi.getTodos();
+      console.log(list);
       setTodos(list);
     } finally {
       setLoading(false);
@@ -55,12 +57,34 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
     return updated;
   };
 
+  const reorderTodos = async (idsInOrder: string[]) => {
+    const previousTodos = todos;
+    setTodos((prev) => {
+      const map = Object.fromEntries(prev.map((t) => [t.id, t]));
+      return idsInOrder.map((id, i) => ({ ...map[id], order: i }));
+    });
+
+    try {
+      const payload = { items: idsInOrder.map((id, index) => ({ id, order: index })) };
+      await todoApi.reorderTodos(payload);
+    } catch (err) {
+      setTodos(previousTodos);
+      throw err;
+    }
+  };
+
   const deleteTodo = async (id: string) => {
     const deleted = await todoApi.deleteTodo(id);
     if (deleted) {
       setTodos((s) => s.filter((t) => t.id !== id));
     }
     return deleted;
+  };
+
+  const toggleCompleted = async (id: string) => {
+    const updated = await todoApi.toggleCompleted(id);
+    setTodos((s) => s.map((t) => (t.id === id ? updated : t)).sort((a, b) => a.order - b.order));
+    return updated;
   };
 
   const counts = {
@@ -82,12 +106,8 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
         createTodo,
         updateTodo,
         deleteTodo,
-        reorderTodos: (idsInOrder: string[]) => {
-          setTodos((prev) => {
-            const map = Object.fromEntries(prev.map((t) => [t.id, t]));
-            return idsInOrder.map((id, i) => ({ ...map[id], order: i }));
-          });
-        },
+        toggleCompleted,
+        reorderTodos,
         filter,
         setFilter,
         counts,

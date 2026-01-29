@@ -1,24 +1,36 @@
 export type TodoDTO = {
   id: string;
   title: string;
-  description?: string;
+  description: string | null;
   completed: boolean;
   order: number;
-  createdAt: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-export type CreateTodoDTO = Pick<TodoDTO, 'title' | 'description'> & {
-  order?: number;
-};
+export interface CreateTodoDTO {
+  title: string;
+  description?: string;
+}
 
-export type UpdateTodoDTO = Partial<Pick<TodoDTO, 'title' | 'description' | 'completed' | 'order'>>;
+export interface UpdateTodoDTO {
+  title: string;
+  description?: string;
+}
+
+export interface ReorderTodoDTO {
+  items: ReorderItemDTO[];
+}
+export interface ReorderItemDTO {
+  id: string;
+  order: number;
+}
 
 export interface TodoApiService {
   getTodos(): Promise<TodoDTO[]>;
   createTodo(payload: CreateTodoDTO): Promise<TodoDTO>;
   updateTodo(id: string, payload: UpdateTodoDTO): Promise<TodoDTO | null>;
   deleteTodo(id: string): Promise<boolean>;
-  reorderTodos(idsInOrder: string[]): Promise<void>;
+  toggleCompleted(id: string): Promise<TodoDTO>;
+  reorderTodos(payload: ReorderTodoDTO): Promise<void>;
 }

@@ -23,8 +23,17 @@ const filterTitleTranslations = {
 };
 
 export function TodosList() {
-  const { todos, loading, createTodo, updateTodo, refresh, reorderTodos, visibleTodos, filter } =
-    useTodos();
+  const {
+    todos,
+    loading,
+    createTodo,
+    updateTodo,
+    toggleCompleted,
+    refresh,
+    reorderTodos,
+    visibleTodos,
+    filter,
+  } = useTodos();
   const t = useTranslations(translations);
   const filterTitles = useTranslations(filterTitleTranslations);
   const [showForm, setShowForm] = useState(false);
@@ -80,26 +89,15 @@ export function TodosList() {
       ...hiddenTodos.slice(firstVisibleOriginalIndex),
     ];
 
-    // Update local state immediately
+    // Update both local state and backend
     if (reorderTodos) {
-      reorderTodos(newGlobalOrder.map((t) => t.id));
-    }
-
-    // Update backend with new order
-    try {
-      await Promise.all(
-        newGlobalOrder.map((todo, index) =>
-          import('~/lib/apis/todos').then(({ todoApi }) =>
-            todoApi.updateTodo(todo.id, { order: index })
-          )
-        )
-      );
-    } catch (err) {
-      // Revert on error
-      await refresh();
+      await reorderTodos(newGlobalOrder.map((t) => t.id));
     }
   };
 
+  const markAsCompleted = async (id: string) => {
+    await toggleCompleted(id);
+  };
   return (
     <main className=" p-6">
       <div className="flex justify-between items-center">
@@ -115,9 +113,7 @@ export function TodosList() {
               <li key={todo.id}>
                 <TodoItem
                   todo={todo}
-                  onToggle={async () => {
-                    await updateTodo(todo.id, { completed: !todo.completed });
-                  }}
+                  onToggle={() => markAsCompleted(todo.id)}
                   onEdit={() => handleEdit(todo.id)}
                   onDetail={() => handleDetail(todo.id)}
                 />
@@ -130,7 +126,16 @@ export function TodosList() {
       <TodoFormModal
         open={showForm}
         onClose={() => setShowForm(false)}
-        initial={editingId ? todos.find((t) => t.id === editingId) : undefined}
+        initial={
+          editingId
+            ? (() => {
+                const todo = todos.find((t) => t.id === editingId);
+                return todo
+                  ? { title: todo.title, description: todo.description || undefined }
+                  : undefined;
+              })()
+            : undefined
+        }
         onSave={async (payload) => {
           if (editingId) {
             await updateTodo(editingId, payload as any);
