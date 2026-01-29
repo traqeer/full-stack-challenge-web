@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { todoApi } from '~/lib/apis/backend';
-import type { CreateTodoDTO, TodoDTO, UpdateTodoDTO } from '~/lib/apis/backend/types';
+import { todoApi } from '~/lib/apis/todos';
+import type { CreateTodoDTO, TodoDTO, UpdateTodoDTO } from '~/lib/apis/todos/types';
 
 type TodosContextType = {
   todos: TodoDTO[];
@@ -8,6 +8,7 @@ type TodosContextType = {
   refresh: () => Promise<void>;
   createTodo: (payload: CreateTodoDTO) => Promise<TodoDTO>;
   updateTodo: (id: string, payload: UpdateTodoDTO) => Promise<TodoDTO | null>;
+  deleteTodo: (id: string) => Promise<boolean>;
   reorderTodos?: (idsInOrder: string[]) => void;
   filter: 'all' | 'pending' | 'completed';
   setFilter: (filter: 'all' | 'pending' | 'completed') => void;
@@ -54,6 +55,14 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
     return updated;
   };
 
+  const deleteTodo = async (id: string) => {
+    const deleted = await todoApi.deleteTodo(id);
+    if (deleted) {
+      setTodos((s) => s.filter((t) => t.id !== id));
+    }
+    return deleted;
+  };
+
   const counts = {
     all: todos.length,
     pending: todos.filter((t) => !t.completed).length,
@@ -72,6 +81,7 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
         refresh,
         createTodo,
         updateTodo,
+        deleteTodo,
         reorderTodos: (idsInOrder: string[]) => {
           setTodos((prev) => {
             const map = Object.fromEntries(prev.map((t) => [t.id, t]));

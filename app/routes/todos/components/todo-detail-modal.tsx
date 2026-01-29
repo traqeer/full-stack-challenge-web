@@ -1,5 +1,5 @@
 import { Button } from '~/components/ui/button';
-import type { TodoDTO } from '~/lib/apis/backend/types';
+import type { TodoDTO } from '~/lib/apis/todos/types';
 import { useTranslations } from '~/lib/i18n/hooks';
 import type { Translations } from '~/lib/i18n/types';
 

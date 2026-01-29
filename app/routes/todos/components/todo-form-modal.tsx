@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import type { CreateTodoDTO } from '~/lib/apis/backend/types';
+import type { CreateTodoDTO } from '~/lib/apis/todos/types';
 import { useTranslations } from '~/lib/i18n/hooks';
 import type { Translations } from '~/lib/i18n/types';
 

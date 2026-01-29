@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Edit, Eye } from 'lucide-react';
 import React from 'react';
 import { Button } from '~/components/ui/button';
-import type { TodoDTO } from '~/lib/apis/backend/types';
+import type { TodoDTO } from '~/lib/apis/todos/types';
 
 export default function TodoItem({
   todo,

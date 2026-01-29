@@ -89,7 +89,7 @@ export function TodosList() {
     try {
       await Promise.all(
         newGlobalOrder.map((todo, index) =>
-          import('~/lib/apis/backend').then(({ todoApi }) =>
+          import('~/lib/apis/todos').then(({ todoApi }) =>
             todoApi.updateTodo(todo.id, { order: index })
           )
         )

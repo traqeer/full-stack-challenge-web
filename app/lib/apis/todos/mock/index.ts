@@ -1,4 +1,5 @@
-import type { CreateTodoDTO, TodoDTO, UpdateTodoDTO } from './types';
+import type { CreateTodoDTO, TodoApiService, TodoDTO, UpdateTodoDTO } from '../types';
+
 function uid() {
   return Math.random().toString(36).slice(2, 9);
 }
@@ -34,13 +35,9 @@ function delay<T>(value: T, ms = 200) {
   return new Promise<T>((res) => setTimeout(() => res(value), ms));
 }
 
-export const todoApi = {
-  async getTodos(): Promise<TodoDTO[]> {
-    const copy = store.slice().sort((a, b) => a.order - b.order);
-    return delay(copy);
-  },
-
-  async createTodo(payload: CreateTodoDTO): Promise<TodoDTO> {
+export const todoApi: TodoApiService = {
+  getTodos: (): Promise<TodoDTO[]> => delay(store.slice().sort((a, b) => a.order - b.order)),
+  createTodo: (payload: CreateTodoDTO): Promise<TodoDTO> => {
     const nextOrder = store.length ? Math.max(...store.map((t) => t.order)) + 1 : 0;
     const now = new Date().toISOString();
     const todo: TodoDTO = {
@@ -54,8 +51,7 @@ export const todoApi = {
     store.push(todo);
     return delay({ ...todo });
   },
-
-  async updateTodo(id: string, payload: UpdateTodoDTO): Promise<TodoDTO | null> {
+  updateTodo: (id: string, payload: UpdateTodoDTO): Promise<TodoDTO | null> => {
     const idx = store.findIndex((t) => t.id === id);
     if (idx === -1) return delay(null);
     const updated: TodoDTO = {
@@ -65,5 +61,22 @@ export const todoApi = {
     };
     store[idx] = updated;
     return delay({ ...updated });
+  },
+  deleteTodo: (id: string): Promise<boolean> => {
+    const idx = store.findIndex((t) => t.id === id);
+    if (idx === -1) return delay(false);
+    store.splice(idx, 1);
+    return delay(true);
+  },
+  reorderTodos: (idsInOrder: string[]): Promise<void> => {
+    const reorderedStore: TodoDTO[] = [];
+    idsInOrder.forEach((id, index) => {
+      const todo = store.find((t) => t.id === id);
+      if (todo) {
+        reorderedStore.push({ ...todo, order: index });
+      }
+    });
+    store.splice(0, store.length, ...reorderedStore);
+    return delay(undefined);
   },
 };
