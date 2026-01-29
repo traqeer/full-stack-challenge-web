@@ -12,7 +12,7 @@ import {
   useSidebar,
 } from '~/components/ui/sidebar';
 import { useTranslations } from '~/lib/i18n/hooks';
-import { useTodos } from './context';
+import { useTodos } from '../context';
 
 const sidebarTranslations = {
   en: {

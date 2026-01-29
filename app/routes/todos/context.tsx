@@ -10,7 +10,6 @@ type TodosContextType = {
   updateTodo: (id: string, payload: UpdateTodoDTO) => Promise<TodoDTO | null>;
   deleteTodo: (id: string) => Promise<boolean>;
   toggleCompleted: (id: string) => Promise<TodoDTO>;
-  reorderTodos?: (idsInOrder: string[]) => Promise<void>;
   filter: 'all' | 'pending' | 'completed';
   setFilter: (filter: 'all' | 'pending' | 'completed') => void;
   counts: {
@@ -19,6 +18,7 @@ type TodosContextType = {
     completed: number;
   };
   visibleTodos: TodoDTO[];
+  updateTodos: (updater: (prev: TodoDTO[]) => TodoDTO[]) => void;
 };
 
 const TodosContext = createContext<TodosContextType | undefined>(undefined);
@@ -57,22 +57,6 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
     return updated;
   };
 
-  const reorderTodos = async (idsInOrder: string[]) => {
-    const previousTodos = todos;
-    setTodos((prev) => {
-      const map = Object.fromEntries(prev.map((t) => [t.id, t]));
-      return idsInOrder.map((id, i) => ({ ...map[id], order: i }));
-    });
-
-    try {
-      const payload = { items: idsInOrder.map((id, index) => ({ id, order: index })) };
-      await todoApi.reorderTodos(payload);
-    } catch (err) {
-      setTodos(previousTodos);
-      throw err;
-    }
-  };
-
   const deleteTodo = async (id: string) => {
     const deleted = await todoApi.deleteTodo(id);
     if (deleted) {
@@ -107,11 +91,11 @@ export function TodosProvider({ children }: { children: React.ReactNode }) {
         updateTodo,
         deleteTodo,
         toggleCompleted,
-        reorderTodos,
         filter,
         setFilter,
         counts,
         visibleTodos,
+        updateTodos: setTodos,
       }}
     >
       {children}

@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
-import type { CreateTodoDTO } from '~/lib/apis/todos/types';
 import { useTranslations } from '~/lib/i18n/hooks';
 import type { Translations } from '~/lib/i18n/types';
+import { useTodos } from '../context';
 
 const localTranslations: Translations = {
   en: {
@@ -28,24 +28,25 @@ const localTranslations: Translations = {
 export function TodoFormModal({
   open,
   onClose,
-  initial,
-  onSave,
+  editingId,
 }: {
   open: boolean;
   onClose: () => void;
-  initial?: { title?: string; description?: string };
-  onSave: (payload: CreateTodoDTO) => Promise<void> | void;
+  editingId?: string;
 }) {
+  const { createTodo, updateTodo, todos } = useTodos();
   const t = useTranslations(localTranslations);
-  const [title, setTitle] = useState(initial?.title || '');
-  const [description, setDescription] = useState(initial?.description || '');
+  const editingTodo = editingId ? todos.find((t) => t.id === editingId) : null;
+  const [title, setTitle] = useState(editingTodo?.title || '');
+  const [description, setDescription] = useState(editingTodo?.description || '');
 
   useEffect(() => {
     if (open) {
-      setTitle(initial?.title || '');
-      setDescription(initial?.description || '');
+      const currentTodo = editingId ? todos.find((t) => t.id === editingId) : null;
+      setTitle(currentTodo?.title || '');
+      setDescription(currentTodo?.description || '');
     }
-  }, [open, initial]);
+  }, [open, editingId, todos]);
 
   if (!open) return null;
 
@@ -53,7 +54,7 @@ export function TodoFormModal({
     <div className="fixed inset-0 z-40 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative z-50 w-full max-w-lg rounded bg-white p-6 shadow-lg">
-        <h3 className="text-lg font-medium">{initial ? t('form.edit') : t('form.new')}</h3>
+        <h3 className="text-lg font-medium">{editingId ? t('form.edit') : t('form.new')}</h3>
         <div className="mt-4 space-y-3">
           <Input
             value={title}
@@ -72,7 +73,11 @@ export function TodoFormModal({
           </Button>
           <Button
             onClick={async () => {
-              await onSave({ title, description });
+              if (editingId) {
+                await updateTodo(editingId, { title, description });
+              } else {
+                await createTodo({ title, description });
+              }
               onClose();
             }}
           >
